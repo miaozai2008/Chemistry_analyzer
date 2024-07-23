@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>400</height>
+   </size>
+  </property>
+  <property name="font">
+   <font>
+    <family>Arial</family>
+    <pointsize>12</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>热化学反应解析器</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QLineEdit" name="lineEdit">
+      <property name="placeholderText">
+       <string>输入方程式 详见关于(H)</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxT">
+        <property name="prefix">
+         <string>反应温度:</string>
+        </property>
+        <property name="suffix">
+         <string>°C</string>
+        </property>
+        <property name="minimum">
+         <double>-273.149999999999977</double>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>25.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="doubleSpinBoxP">
+        <property name="prefix">
+         <string>反应气压:</string>
+        </property>
+        <property name="suffix">
+         <string>kPa</string>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+        <property name="value">
+         <double>101.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTextBrowser" name="textBrowser">
+      <property name="openExternalLinks">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="pushButton">
+      <property name="cursor">
+       <cursorShape>PointingHandCursor</cursorShape>
+      </property>
+      <property name="text">
+       <string>解析</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>600</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_H">
+    <property name="title">
+     <string>关于(&amp;H)</string>
+    </property>
+    <addaction name="action_H"/>
+    <addaction name="separator"/>
+    <addaction name="action_Qt"/>
+    <addaction name="action_this"/>
+   </widget>
+   <widget class="QMenu" name="menu_R">
+    <property name="title">
+     <string>反馈(&amp;R)</string>
+    </property>
+    <addaction name="action_code"/>
+    <addaction name="action_issue"/>
+   </widget>
+   <addaction name="menu_H"/>
+   <addaction name="menu_R"/>
+  </widget>
+  <action name="action_code">
+   <property name="text">
+    <string>源代码</string>
+   </property>
+  </action>
+  <action name="action_issue">
+   <property name="text">
+    <string>提交issue</string>
+   </property>
+  </action>
+  <action name="action_H">
+   <property name="text">
+    <string>使用辅助</string>
+   </property>
+  </action>
+  <action name="action_D">
+   <property name="text">
+    <string>关于开发</string>
+   </property>
+  </action>
+  <action name="action_Qt">
+   <property name="text">
+    <string>关于Qt</string>
+   </property>
+  </action>
+  <action name="action_this">
+   <property name="text">
+    <string>关于解析器</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
