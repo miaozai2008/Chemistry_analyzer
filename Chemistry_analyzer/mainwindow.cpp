@@ -69,3 +69,17 @@ void MainWindow::on_pushButton_clicked() {//点击按钮
 	core->write((QString::number(ui->doubleSpinBoxT->value() + 273.15) + "\n").toLocal8Bit());
 	core->write((QString::number(ui->doubleSpinBoxP->value()) + "\n").toLocal8Bit());
 }
+
+void MainWindow::error() {
+	ui->textBrowser->setHtml(QStringLiteral("|Core进程错误:"));
+	ui->textBrowser->append(core->errorString());
+	ui->textBrowser->append(QStringLiteral("请在Core.exe就位后重启软件"));
+	QMessageBox::critical(this, QStringLiteral("进程错误"), QStringLiteral("Core进程出现错误"));
+	ui->pushButton->setDisabled(true);
+}
+
+void MainWindow::output() {
+	QByteArray arr = core->readAllStandardOutput();
+	static QStringDecoder toUtf = QStringDecoder(QStringDecoder::System);
+	ui->textBrowser->append(toUtf(arr));
+}
