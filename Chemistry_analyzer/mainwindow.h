@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QProcess>
+#include <QtSql>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -28,5 +29,6 @@ private slots:
 private:
 	Ui::MainWindow* ui;
 	QProcess* core = new QProcess(this);
+	QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
 };
 #endif // MAINWINDOW_H

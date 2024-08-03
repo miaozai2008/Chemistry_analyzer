@@ -103,8 +103,8 @@ public:
 			for (size_t i = 0; i < mat.sizev(); i++) {
 				int x = 0, y = 1;//分子，分母
 				for (int j = 0; j < mat.sizeh(); j++) {
-					x = int(gcd(mat[j][i].up, x));
-					y = int(lcm(mat[j][i].down, y));
+					x = gcd(mat[j][i].up, x);
+					y = lcm(mat[j][i].down, y);
 				}
 				rat r(x, y);
 				for (size_t j = 0; j < mat.sizeh(); j++)

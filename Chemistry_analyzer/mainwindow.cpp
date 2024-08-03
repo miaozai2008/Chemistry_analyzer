@@ -22,9 +22,8 @@ MainWindow::MainWindow(QWidget* parent)
 		ui->pushButton->setDisabled(true);
 		});
 	connect(core, &QProcess::readyReadStandardOutput, this, [=]() {
-		QByteArray arr = core->readAllStandardOutput();
 		static QStringDecoder toUtf = QStringDecoder(QStringDecoder::System);
-		ui->textBrowser->append(toUtf(arr));
+		ui->textBrowser->append(toUtf(core->readAllStandardOutput()));
 		});
 	core->start(QIODevice::ReadWrite);
 }
@@ -60,12 +59,11 @@ void MainWindow::on_action_issue_triggered() {//提交issue
 
 void MainWindow::on_pushButton_clicked() {//点击按钮
 	ui->textBrowser->setHtml(QTime::currentTime().toString("|hh:mm:ss"));
-	ui->lineEdit->setText(ui->lineEdit->text().trimmed().remove(" "));
 	if (ui->lineEdit->text().isEmpty() || ui->lineEdit->text() == "[exit]") {
 		ui->textBrowser->append(QStringLiteral("化学式错误"));
 		return;
 	}
-	core->write((ui->lineEdit->text() + "\n").toLocal8Bit());
+	core->write((ui->lineEdit->text().trimmed().remove(" ") + "\n").toLocal8Bit());
 	core->write((QString::number(ui->doubleSpinBoxT->value() + 273.15) + "\n").toLocal8Bit());
 	core->write((QString::number(ui->doubleSpinBoxP->value()) + "\n").toLocal8Bit());
 }

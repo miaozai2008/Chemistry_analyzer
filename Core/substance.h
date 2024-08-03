@@ -91,8 +91,6 @@ public:
 			count = rat(stoi(match[1]), (match.length(2) ? stoi(match[2]) : 1));
 			begin += match.length();
 		}
-		//填写formula
-		formula = wstring(begin, end) + form;
 		//分离电荷数
 		int cnum = 0;
 		static const wregex charge_reg(L"<(\\d*)(\\+|\\-)>$");
