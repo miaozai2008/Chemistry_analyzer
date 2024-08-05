@@ -3,29 +3,30 @@
 #include "substance.h"
 #include <list>
 #include <map>
+#include <numeric>
 #include <regex>
 #include <sstream>
-#include <numeric>
 #include <string>
 using namespace std;
 
-struct condition {
-	__readonly double t;//开尔文温度
-	__readonly double p;//反应压强
-
-	constexpr condition(double t_, double p_) :t(t_), p(p_) {
-		if (t_ < 0 || p_ < 0)throw L"无效的温度或压强";
-	}
-	constexpr condition(condition&&)noexcept = default;
-	constexpr condition(const condition&)noexcept = default;
-};
-const constexpr condition stp(273.15 + 25, 101.00);//0C->K 1atm->kPa
-
 class equation {
+public:
+	struct condition {
+		double t;//开尔文温度
+		double p;//反应压强
+
+		constexpr condition(condition&&)noexcept = default;
+		constexpr condition(const condition&)noexcept = default;
+		constexpr condition(double t_, double p_) :t(t_), p(p_) {
+			if (t_ < 0 || p_ < 0)throw L"无效的温度或压强";
+		}
+	};
+
 private:
 	list<pair<substance, bool>>substances;//物质列表
 	condition tp;//温度&压强
 	ratmatrix mat;//储存系数结果矩阵 外层列 元素|电荷 内层行 未知数|系数
+	bool has_more = true;//是否可以计算熵焓
 
 public:
 	equation(const wstring& str, const condition& cond) :tp(cond) {
@@ -54,7 +55,7 @@ public:
 		}
 	}
 
-	void balance(bool int_ = true) {//是否整数化
+	void compute(bool int_ = true) {//是否整数化 配平 计算h s g
 		//统计元素及其个数
 		map<short, rat>elems;//统计每种元素
 		for (const auto& pair_ : substances)
@@ -111,9 +112,16 @@ public:
 					mat.in(j, i) /= r;
 			}
 		}
+		//计算s h g
+		for (auto& p : substances) {
+			if (!p.first.search()) {
+				has_more = false;
+				return;
+			}
+		}
 	}
 
-	[[nodiscard]] wstring print()const {//输出配平结果
+	[[nodiscard]] wstring print()const noexcept{//输出结果
 		auto join = [&](const list<wstring>& l, const wchar_t* w) {
 			if (l.size() == 1)return l.front();
 			int i = 0;
@@ -133,8 +141,8 @@ public:
 			out << fixed << num;
 			return out.str();
 			};
-		wstring cond = tp.t == stp.t ? L"" : to_wstring_(tp.t, 2) + L"K";
-		if (tp.p != stp.p)cond += (cond.empty() ? L"" : L",") + to_wstring_(tp.p, 2) + L"kPa";
+		wstring cond = tp.t == 273.15 + 25 ? L"" : to_wstring_(tp.t, 2) + L"K";//stp t
+		if (tp.p != 101)cond += (cond.empty() ? L"" : L",") + to_wstring_(tp.p, 2) + L"kPa";//stp p
 		cond = L"==" + cond + L"==";
 		list<wstring> list_;
 		for (int i = 0; i < mat.sizev(); i++) {//遍历列

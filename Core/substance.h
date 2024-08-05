@@ -1,8 +1,10 @@
 ﻿#include "rat.h"
+#include <fstream>
 #include <map>
 #include <regex>
 #include <stack>
 #include <string>
+#include <unordered_map>
 using namespace std;
 
 class substance {
@@ -48,18 +50,20 @@ public:
 	__readonly wstring html;//对外显示化学式
 	__readonly rat count = 0;//用户定义系数
 	__readonly map<short, int> elements; //元素及个数列表
+	__readonly double h = 0;//焓 kJ
+	__readonly double s = 0;//熵 J
 
-	substance(_Cwit begin, _Cwit end)
-	{
+	substance(_Cwit begin, _Cwit end) {
 		wsmatch match;
 		//分离状态
 		wstring state;
 		static const wregex form_reg(L"(\\([a-z]+\\))$");
+		bool has_state = true;
 		if (regex_search(begin, end, match, form_reg)) {
 			state = match[1];
 			end -= match.length();
 		}
-		else throw L"缺少物质状态";
+		else has_state = false;
 		//是否为空 检查括号是否匹配 数字超过8位
 		if (begin == end)throw L"物质不能为空";
 		else {
@@ -99,7 +103,8 @@ public:
 			end -= match.length();
 		}
 		//填写formula
-		formula = wstring(begin, end) + (cnum ? (cnum > 0 ? L"+" : L"") + to_wstring(cnum) : L"") + state;
+		if (has_state)
+			formula = wstring(begin, end) + (cnum ? (cnum > 0 ? L"+" : L"") + to_wstring(cnum) : L"") + state;
 		//判断是否空 ·的存在 临时变量
 		if (begin == end)throw L"物质不能为空";
 		html.assign(begin, end);
@@ -136,7 +141,28 @@ public:
 			else  html += L"<sup>" + to_wstring(abs(cnum)) + (cnum < 0 ? L"-" : L"+") + L"</sup>";
 		}
 		if (has_dot)html = L'[' + html + L']';
-		html += state;
+		if (has_state)html += state;
+	}
+
+	[[nodiscard]] bool search() {//查询txt文件找熵焓
+		if (formula.empty())return false;
+		static unordered_map<wstring, pair<double, double>> datas;//物质 H S
+		if (datas.empty()) {
+			wifstream input("datas.txt");
+			if (!input.is_open())throw L"datas.txt未找到";
+			wstring line;
+			wregex reg(L"(.+?)\t(.+?)\t(.+?)");
+			wsmatch match;
+			while (getline(input, line)) {
+				if (!regex_match(line, match, reg))throw wstring(L"datas.txt格式错误");
+				datas.emplace(match[1], make_pair(stod(match[2]), stod(match[3])));
+			}
+		}
+		decltype(datas)::const_iterator it = datas.find(formula);
+		if (it == datas.cend())return false;
+		h = it->second.first;
+		s = it->second.second;
+		return true;
 	}
 
 	inline substance(const substance&)noexcept = default;

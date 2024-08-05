@@ -144,7 +144,7 @@
     <ClInclude Include="substance.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include=".clang-tidy" />
+    <Text Include="datas.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

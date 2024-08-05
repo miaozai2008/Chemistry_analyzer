@@ -14,8 +14,8 @@ int main() {
 		if (formula == L"[exit]")break;
 		wcin >> tem >> pres;
 		try {
-			equation my_equation(formula, condition(tem, pres));
-			my_equation.balance();
+			equation my_equation(formula, equation::condition(tem, pres));
+			my_equation.compute();
 			wcout << my_equation.print() << endl;
 		}
 		catch (const wstring& error) {
