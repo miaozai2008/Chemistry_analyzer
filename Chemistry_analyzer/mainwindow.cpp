@@ -12,13 +12,13 @@ MainWindow::MainWindow(QWidget* parent)
 	//配置界面
 	ui->setupUi(this);
 	ui->statusBar->showMessage(QStringLiteral("欢迎使用热化学反应解析器"), 8000);
-	ui->statusBar->addPermanentWidget(new QLabel("DYZ(C) v5.0 2024.7.13", this));
+	ui->statusBar->addPermanentWidget(new QLabel("DYZ(C) v5.0 2024.8.6", this));
 	//连接core
 	core->setProgram("Core.exe");
 	connect(core, &QProcess::errorOccurred, this, [=]() {
 		ui->textBrowser->setHtml(QStringLiteral("|Core进程错误:"));
 		ui->textBrowser->append(core->errorString());
-		ui->textBrowser->append(QStringLiteral("请在Core.exe就位后重启软件"));
+		ui->textBrowser->append(QStringLiteral("请在Core.exe就位后重启"));
 		ui->pushButton->setDisabled(true);
 		});
 	connect(core, &QProcess::readyReadStandardOutput, this, [=]() {
@@ -41,7 +41,7 @@ void MainWindow::on_action_this_triggered() {//解析器介绍
 void MainWindow::on_action_H_triggered() {//使用辅助
 	ui->textBrowser->setHtml(QStringLiteral("|使用辅助"));
 	ui->textBrowser->append(QStringLiteral("合法物质:e<-> NH4<+>(aq) 1/2O2 [KAl(SO4)2·12H2O] 支持括号嵌套"));
-	ui->textBrowser->append(QStringLiteral("输入示范:1/3H2O(l)+Cl2(g)--H<+>(aq)+Cl<->(aq)+HClO(aq) 空格不限"));
+	ui->textBrowser->append(QStringLiteral("输入示范:1/3H2O(l)+Cl2(g)--H<+>(aq)+Cl<->(aq)+HClO(aq) 空格，是否指定物态不限"));
 	ui->textBrowser->append(QStringLiteral("STP(标准温度&气压):25°C,101kPa"));
 }
 
@@ -66,18 +66,4 @@ void MainWindow::on_pushButton_clicked() {//点击按钮
 	core->write((ui->lineEdit->text().trimmed().remove(" ") + "\n").toLocal8Bit());
 	core->write((QString::number(ui->doubleSpinBoxT->value() + 273.15) + "\n").toLocal8Bit());
 	core->write((QString::number(ui->doubleSpinBoxP->value()) + "\n").toLocal8Bit());
-}
-
-void MainWindow::error() {
-	ui->textBrowser->setHtml(QStringLiteral("|Core进程错误:"));
-	ui->textBrowser->append(core->errorString());
-	ui->textBrowser->append(QStringLiteral("请在Core.exe就位后重启软件"));
-	QMessageBox::critical(this, QStringLiteral("进程错误"), QStringLiteral("Core进程出现错误"));
-	ui->pushButton->setDisabled(true);
-}
-
-void MainWindow::output() {
-	QByteArray arr = core->readAllStandardOutput();
-	static QStringDecoder toUtf = QStringDecoder(QStringDecoder::System);
-	ui->textBrowser->append(toUtf(arr));
 }

@@ -145,10 +145,10 @@ public:
 		if (tp.p != 101)cond += (cond.empty() ? L"" : L",") + to_wstring_(tp.p, 2) + L"kPa";//stp p
 		cond = L"==" + cond + L"==";
 		list<wstring> list_;
-		for (int i = 0; i < mat.sizev(); i++) {//遍历列
+		for (size_t i = 0; i < mat.sizev(); i++) {//遍历列
 			list<wstring> left, right;
 			int j = -1;
-			for (const pair<substance, bool>& p : substances) {
+			for (const auto& p : substances) {
 				j++;
 				if (mat[j][i] == 0)continue;
 				wstring text = (abs(mat[j][i]) != 1 ? L"<span style=\"background-color: #3c9eef;\">"
@@ -157,14 +157,29 @@ public:
 				else { right.push_back(move(text)); }
 			}
 			list_.push_back(join(left, L" + ") + cond + join(right, L" + "));
+			j = -1;
+			if (has_more) {//添加S H G
+				double h = 0, s = 0;
+				for (const auto& p : substances) {
+					j++;
+					h += p.first.h * mat[j][i].to_double() * (p.second ? 1 : -1);
+					s += p.first.s * mat[j][i].to_double() * (p.second ? 1 : -1);
+				}
+				list_.push_back(L" ΔH=<u>" + to_wstring_(h, 3) + L"</u>kJ/mol");
+				if (tp.p == 101) {//标准大气压
+					list_.back().append(L" ΔS=<u>" + to_wstring_(s, 3) + L"</u>J/(molK)");
+					list_.back().append(L" ΔG=<u>" + to_wstring_(h - s * tp.t / 1000, 3) + L"</u>kJ/mol");
+				}
+			}
 		}
 		list<wstring> empty;
 		int i = -1;
-		for (const pair<substance, bool>& p : substances) {
+		for (const auto& p : substances) {
 			i++;
 			if (mat.count(i, 0) == mat.sizev()) { empty.push_back(p.first.html); }
 		}
 		if (!empty.empty()) { list_.push_back(L"可能未参与物质:" + join(empty, L" ")); }
+		if (!has_more)list_.push_back(L"无算计算熵焓:未指定物态或未搜寻到数据");
 		return join(list_, L"<br>");
 	}
 

@@ -149,7 +149,7 @@ public:
 		static unordered_map<wstring, pair<double, double>> datas;//物质 H S
 		if (datas.empty()) {
 			wifstream input("datas.txt");
-			if (!input.is_open())throw L"datas.txt未找到";
+			if (!input.is_open())throw wstring(L"datas.txt未找到");
 			wstring line;
 			wregex reg(L"(.+?)\t(.+?)\t(.+?)");
 			wsmatch match;

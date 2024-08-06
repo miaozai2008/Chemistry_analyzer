@@ -21,8 +21,6 @@ private slots:
 	void on_action_Qt_triggered();
 	void on_action_code_triggered();
 	void on_action_issue_triggered();
-	void error();
-	void output();
 	void on_action_this_triggered();
 
 private:
