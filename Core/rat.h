@@ -16,7 +16,7 @@ private:
 			down = 1;
 			return;
 		}
-		const _Elem x = _Elem(std::gcd(up, down));
+		const _Elem x = std::gcd(up, down);
 		up /= x;
 		down /= x;
 		if (down < 0) {

@@ -121,7 +121,7 @@ public:
 		}
 	}
 
-	[[nodiscard]] wstring print()const noexcept{//输出结果
+	[[nodiscard]] wstring print()const noexcept {//输出结果
 		auto join = [&](const list<wstring>& l, const wchar_t* w) {
 			if (l.size() == 1)return l.front();
 			int i = 0;
@@ -176,9 +176,9 @@ public:
 		int i = -1;
 		for (const auto& p : substances) {
 			i++;
-			if (mat.count(i, 0) == mat.sizev()) { empty.push_back(p.first.html); }
+			if (mat.count(i, 0) == mat.sizev())empty.push_back(p.first.html);
 		}
-		if (!empty.empty()) { list_.push_back(L"可能未参与物质:" + join(empty, L" ")); }
+		if (!empty.empty())list_.push_back(L"可能未参与物质:" + join(empty, L" "));
 		if (!has_more)list_.push_back(L"无算计算熵焓:未指定物态或未搜寻到数据");
 		return join(list_, L"<br>");
 	}

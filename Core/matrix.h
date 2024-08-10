@@ -38,7 +38,7 @@ public:
 		return cnt;
 	}
 
-	constexpr basic_matrix<_Elem>(const vector<vector<_Elem>>& matrix) {
+	constexpr basic_matrix(const vector<vector<_Elem>>& matrix) {
 		assert(!matrix.empty());
 		for (const vector<_Elem>& l : matrix)
 			assert(l.size() == matrix.front().size());

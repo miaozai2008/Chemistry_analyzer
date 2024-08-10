@@ -12,7 +12,7 @@ private:
 	wstring formula;//物质化学式
 	using _Cwit = wstring::const_iterator;
 
-	[[nodiscard]] inline map<short, int>dispose(const _Cwit begin, const _Cwit end)const {
+	[[nodiscard]] inline map<short, int>dispose(_Cwit begin, _Cwit end)const {
 		if (!iswupper(*begin))throw L"元素必须以大写开头";
 		map<short, int>elems;
 		stack<int>amps;
@@ -32,7 +32,6 @@ private:
 				if (*it == L')' || *it == L']')continue;
 				if (iswupper(*it))elems[*it - L'A'] += amp_;
 				else if (iswlower(*it)) {
-					if (it == begin)throw L"无效元素";
 					short key = (*it - L'a' + 1) * 26;
 					it--;
 					if (!iswupper(*it))throw L"无效元素";
@@ -116,7 +115,7 @@ public:
 			begin++;
 			end--;
 			static const wregex split_reg(L"·"), num_reg(L"^(\\d*)");
-			wsregex_token_iterator it_end;
+			static const wsregex_token_iterator it_end;
 			for (wsregex_token_iterator it(begin, end, split_reg, -1); it != it_end; it++) {
 				regex_search(it->first, it->second, match, num_reg);
 				const int num = match[1].length() ? stoi(match[1]) : 1;
