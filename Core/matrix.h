@@ -4,6 +4,7 @@
 #include <vector>
 #include <iosfwd>
 #include <ostream>
+#include <iostream>
 using std::vector, std::size_t, std::move, std::endl;
 
 template<typename _Elem>
@@ -40,7 +41,7 @@ public:
 
 	constexpr basic_matrix(const vector<vector<_Elem>>& matrix) {
 		assert(!matrix.empty());
-		for (const vector<_Elem>& l : matrix)
+		for (const auto& l : matrix)
 			assert(l.size() == matrix.front().size());
 		mat = matrix;
 	}
@@ -58,15 +59,15 @@ public:
 	constexpr void transpose()noexcept {//行列交换
 		if (mat.empty())return;
 		vector<vector<_Elem>>_mat(sizev(), vector<_Elem>(sizeh()));
-		for (int i = 0; i < sizeh(); i++)
-			for (int j = 0; j < sizev(); j++)
+		for (size_t i = 0; i < sizeh(); i++)
+			for (size_t j = 0; j < sizev(); j++)
 				_mat[j][i] = move(mat[i][j]);
 		mat = move(_mat);
 	}
 
 	friend inline std::ostream& operator<<(std::ostream& os, const basic_matrix& m) {
 		os << endl << "matrix:" << endl;
-		for (const vector<_Elem>& v : m.mat) {
+		for (const auto& v : m.mat) {
 			for (const _Elem& _t : v)	{
 				os << _t << " ";
 			}
@@ -78,7 +79,7 @@ public:
 
 	friend inline std::wostream& operator<<(std::wostream& os, const basic_matrix& m) {
 		os << endl << L"matrix:" << endl;
-		for (const vector<_Elem>& v : m.mat) {
+		for (const auto& v : m.mat) {
 			for (const _Elem& _t : v){
 				os << _t << L" ";
 			}
@@ -89,7 +90,7 @@ public:
 	}
 
 	constexpr void operator *=(const _Elem& t)noexcept {
-		for (vector<_Elem>& v : mat)	{
+		for (auto& v : mat)	{
 			for (_Elem& _t : v)		{
 				_t *= t;
 			}

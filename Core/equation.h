@@ -29,12 +29,10 @@ private:
 	bool has_more = true;//是否可以计算熵焓
 
 public:
-	equation(const wstring& str, const condition& cond) :tp(cond) {
+	equation(const wstring& str, condition&& cond) :tp(cond) {
 		//按连接符号分割 判断空
 		size_t p = str.find(L"--");
-		if (p == wstring::npos || p != str.rfind(L"--"))
-			throw wstring(L"连接符号错误");
-		if (p == 0 || p + 2 == str.size())throw wstring(L"化学式不能为空");
+		if (p == wstring::npos || p != str.rfind(L"--"))throw wstring(L"连接符号错误");
 		//分为左右，正则进一步分割
 		const wstring::const_iterator split_begin = str.cbegin() + p, split_end = split_begin + 2;
 		static const wregex split_reg(L"\\+(?!\\>)");
@@ -58,26 +56,26 @@ public:
 	void compute(bool int_ = true) {//是否整数化 配平 计算h s g
 		//统计元素及其个数
 		map<short, rat>elems;//统计每种元素
-		for (const auto& pair_ : substances)
-			for (const auto& p : pair_.first.elements)
-				elems[p.first] += pair_.first.count * p.second * (pair_.second ? -1 : 1);
+		for (const auto& [sub, reversed] : substances)
+			for (const auto& [elem, num] : sub.elements)
+				elems[elem] += sub.count * num * (reversed ? -1 : 1);
 		//判断有无待定系数
 		bool has = false;
-		for (const auto& p : substances)
-			if (p.first.count != 0) {
+		for (const auto& [sub, _] : substances)
+			if (sub.count != 0) {
 				has = true;
 				break;
 			}
 		//向矩阵中插入元素
-		for (const auto& pair_ : elems) {
-			vector<rat> nums;
-			for (const auto& p : substances)
-				if (p.first.count == 0) {
-					const auto it = p.first.elements.find(pair_.first);
-					nums.emplace_back(it != p.first.elements.cend() ? it->second * (p.second ? -1 : 1) : 0);
+		for (const auto& [elem, num] : elems) {
+			vector<rat>nums;
+			for (const auto& [sub, reversed] : substances)
+				if (sub.count == 0) {
+					const auto it = sub.elements.find(elem);
+					nums.push_back((it == sub.elements.cend() ? 0 : it->second) * (reversed ? -1 : 1));
 				}
-			if (has)nums.push_back(pair_.second);
-			mat.append(nums);
+			if (has)nums.push_back(num);
+			mat.append(move(nums));
 		}
 		//求解赋值
 		if (mat.sizev() == 1)throw wstring(L"所有系数已被决定");
@@ -86,15 +84,15 @@ public:
 		//把待定系数项放回去
 		if (has) {
 			ratmatrix mat_;
-			int i = 0;
-			for (const auto& p : substances) {
-				if (p.first.count == 0) {
+			size_t i = 0;
+			for (const auto& [sub, _] : substances) {
+				if (sub.count == 0) {
 					mat_.append(mat[i]);
 					i++;
 					continue;
 				}
 				vector<rat>vec = mat.back();
-				for (rat& r : vec)r *= p.first.count;
+				for (rat& r : vec)r *= sub.count;
 				mat_.append(move(vec));
 			}
 			mat = move(mat_);
@@ -113,8 +111,8 @@ public:
 			}
 		}
 		//计算s h g
-		for (auto& p : substances) {
-			if (!p.first.search()) {
+		for (auto& [sub, _] : substances) {
+			if (!sub.search()) {
 				has_more = false;
 				return;
 			}
@@ -123,8 +121,9 @@ public:
 
 	[[nodiscard]] wstring print()const noexcept {//输出结果
 		auto join = [&](const list<wstring>& l, const wchar_t* w) {
+			if (l.empty())return wstring();
 			if (l.size() == 1)return l.front();
-			int i = 0;
+			size_t i = 0;
 			wstring result;
 			for (const wstring& str : l) {
 				result.append(str);
@@ -148,22 +147,22 @@ public:
 		for (size_t i = 0; i < mat.sizev(); i++) {//遍历列
 			list<wstring> left, right;
 			int j = -1;
-			for (const auto& p : substances) {
+			for (const auto& [sub, reversed] : substances) {
 				j++;
 				if (mat[j][i] == 0)continue;
 				wstring text = (abs(mat[j][i]) != 1 ? L"<span style=\"background-color: #3c9eef;\">"
-					+ (abs(mat[j][i])).to_wstring() + L"</span>" : L"") + p.first.html;
-				if (mat[j][i] > 0 != p.second) { left.push_back(move(text)); }
-				else { right.push_back(move(text)); }
+					+ (abs(mat[j][i])).to_wstring() + L"</span>" : L"") + sub.html;
+				if (mat[j][i] > 0 != reversed)  left.push_back(move(text));
+				else right.push_back(move(text));
 			}
 			list_.push_back(join(left, L" + ") + cond + join(right, L" + "));
 			j = -1;
 			if (has_more) {//添加S H G
 				double h = 0, s = 0;
-				for (const auto& p : substances) {
+				for (const auto& [sub, reversed] : substances) {
 					j++;
-					h += p.first.h * mat[j][i].to_double() * (p.second ? 1 : -1);
-					s += p.first.s * mat[j][i].to_double() * (p.second ? 1 : -1);
+					h += sub.h * mat[j][i].to_double() * (reversed ? 1 : -1);
+					s += sub.s * mat[j][i].to_double() * (reversed ? 1 : -1);
 				}
 				list_.push_back(L" ΔH=<u>" + to_wstring_(h, 3) + L"</u>kJ/mol");
 				if (tp.p == 101) {//标准大气压
@@ -174,9 +173,9 @@ public:
 		}
 		list<wstring> empty;
 		int i = -1;
-		for (const auto& p : substances) {
+		for (const auto& [sub, _] : substances) {
 			i++;
-			if (mat.count(i, 0) == mat.sizev())empty.push_back(p.first.html);
+			if (mat.count(i, 0) == mat.sizev())empty.push_back(sub.html);
 		}
 		if (!empty.empty())list_.push_back(L"可能未参与物质:" + join(empty, L" "));
 		if (!has_more)list_.push_back(L"无算计算熵焓:未指定物态或未搜寻到数据");
