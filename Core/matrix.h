@@ -4,6 +4,7 @@
 #include <vector>
 #include <iosfwd>
 #include <ostream>
+#include <iostream>
 using std::vector, std::size_t, std::move, std::endl;
 
 template<typename _Elem>
