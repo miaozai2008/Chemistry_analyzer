@@ -1,10 +1,9 @@
 ﻿#include "rat.h"
 #include <cassert>
-#include <set>
-#include <vector>
 #include <iosfwd>
 #include <ostream>
-#include <iostream>
+#include <set>
+#include <vector>
 using std::vector, std::size_t, std::move, std::endl;
 
 template<typename _Elem>
@@ -68,7 +67,7 @@ public:
 	friend inline std::ostream& operator<<(std::ostream& os, const basic_matrix& m) {
 		os << endl << "matrix:" << endl;
 		for (const auto& v : m.mat) {
-			for (const _Elem& _t : v)	{
+			for (const _Elem& _t : v) {
 				os << _t << " ";
 			}
 			os << endl;
@@ -80,7 +79,7 @@ public:
 	friend inline std::wostream& operator<<(std::wostream& os, const basic_matrix& m) {
 		os << endl << L"matrix:" << endl;
 		for (const auto& v : m.mat) {
-			for (const _Elem& _t : v){
+			for (const _Elem& _t : v) {
 				os << _t << L" ";
 			}
 			os << endl;
@@ -90,8 +89,8 @@ public:
 	}
 
 	constexpr void operator *=(const _Elem& t)noexcept {
-		for (auto& v : mat)	{
-			for (_Elem& _t : v)		{
+		for (auto& v : mat) {
+			for (_Elem& _t : v) {
 				_t *= t;
 			}
 		}
@@ -99,14 +98,14 @@ public:
 
 	inline void to_upper_triangular() {//化为上三角阵
 		if (mat.empty())return;
-		for (size_t i = 0; i < sizev(); i++){//i 列
+		for (size_t i = 0; i < sizev(); i++) {//i 列
 			for (size_t j = i + 1; j < sizeh(); j++) {//j行
 				if (mat.at(j).at(i) == 0)continue;
 				std::swap(mat[i], mat[j]);
 				if (mat.at(j).at(i) == 0)continue;
 				_Elem a = mat.at(j).at(i) / mat.at(i).at(i);
 				for (size_t k = i; k < sizev(); k++) {//倍增后减过去
-					if (mat.at(i).at(k) != 0){
+					if (mat.at(i).at(k) != 0) {
 						mat[j][k] -= mat.at(i).at(k) * a;
 					}
 				}

@@ -1,14 +1,13 @@
 ﻿#pragma once
 #include <cassert>
-#include <string>
-#include <type_traits>
 #include <iosfwd>
 #include <numeric>
+#include <string>
+#include <type_traits>
 
 template<typename _Elem>
 class basic_rat {
 	static_assert(std::is_signed<_Elem>::value&& std::is_integral<_Elem>::value, "_Elem must be a signed integer");
-
 private:
 	constexpr void simplify() {
 		assert(down);
