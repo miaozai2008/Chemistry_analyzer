@@ -31,20 +31,6 @@ public:
 	[[nodiscard]] constexpr const vector<_Elem>& front()const { return mat.front(); }
 	[[nodiscard]] constexpr const vector<_Elem>& back()const { return mat.back(); }
 
-	[[nodiscard]] constexpr size_t count(const size_t& l, const _Elem& t_)const {
-		size_t cnt = 0;
-		for (const _Elem& t : mat[l])
-			if (t == t_)cnt++;
-		return cnt;
-	}
-
-	constexpr basic_matrix(const vector<vector<_Elem>>& matrix) {
-		assert(!matrix.empty());
-		for (const auto& l : matrix)
-			assert(l.size() == matrix.front().size());
-		mat = matrix;
-	}
-
 	constexpr void append(const vector<_Elem>& v) {
 		assert(!(v.empty() || !mat.empty() && v.size() != sizev()));
 		mat.push_back(v);
@@ -145,8 +131,8 @@ public:
 		}
 		//判断无解情况
 		if (sizeh() >= sizev() - 1)
-			for (size_t i = 0; i < sizeh(); i++)
-				if ((mat.at(i).back() != 0) && (count(i, 0) == sizev() - 1))
+			for (const auto& line : mat)
+				if (line.cend() - 1 == find_if_not(line.cbegin(), line.cend(), [](const rat& x) {return x == 0; }))
 					return false;
 		//生成-F矩阵 拼接I矩阵
 		size_t original_size = sizev();//原本列数

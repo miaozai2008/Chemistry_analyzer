@@ -175,7 +175,8 @@ public:
 		int i = -1;
 		for (const auto& [sub, _] : substances) {
 			i++;
-			if (mat.count(i, 0) == mat.sizev())empty.push_back(sub.html);
+			if (mat[i].cend() == find_if_not(mat[i].cbegin(), mat[i].cend(), [](const rat& x) {return x == 0; }))
+				empty.push_back(sub.html);
 		}
 		if (!empty.empty())list_.push_back(L"可能未参与物质:" + join(empty, L" "));
 		if (!has_more)list_.push_back(L"无算计算熵焓:未指定物态或未搜寻到数据");
