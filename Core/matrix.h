@@ -1,17 +1,16 @@
 ﻿#include "rat.h"
 #include <cassert>
 #include <iosfwd>
-#include <ostream>
 #include <set>
 #include <vector>
-using std::vector, std::size_t, std::move, std::endl;
 
-template<typename _Elem>
+template<std::common_with<short> _Num>
 class basic_matrix {//未说明默认行操作
 private:
-	vector<vector<_Elem>>mat;
+	std::vector<std::vector<_Num>>mat;
 
 public:
+	using const_iterator = std::vector<std::vector<_Num>>::const_iterator;//行只读迭代器
 	static constexpr auto npos{ static_cast<size_t>(-1) };
 
 	constexpr basic_matrix() = default;
@@ -26,57 +25,54 @@ public:
 	[[nodiscard]] constexpr size_t sizeh()const { return mat.size(); }//行数
 	[[nodiscard]] constexpr size_t sizev()const { return mat.empty() ? 0 : mat.front().size(); }//列数
 	[[nodiscard]] constexpr bool empty()const { return mat.empty(); }
-	[[nodiscard]] constexpr const vector<_Elem>& operator[](const size_t& x)const { return mat[x]; }
-	[[nodiscard]] constexpr _Elem& in(const size_t& x, const size_t& y) { return mat[x][y]; }
-	[[nodiscard]] constexpr const vector<_Elem>& front()const { return mat.front(); }
-	[[nodiscard]] constexpr const vector<_Elem>& back()const { return mat.back(); }
+	[[nodiscard]] constexpr const std::vector<_Num>& operator[](const size_t& x)const { return mat[x]; }
+	[[nodiscard]] constexpr _Num& in(const size_t& x, const size_t& y) { return mat[x][y]; }
+	[[nodiscard]] constexpr _Num& in(const_iterator x, const size_t& y) { return *x[y]; }
+	[[nodiscard]] constexpr const std::vector<_Num>& front()const { return mat.front(); }
+	[[nodiscard]] constexpr const std::vector<_Num>& back()const { return mat.back(); }
+	[[nodiscard]] constexpr const_iterator cbegin()const { return mat.cbegin(); }
+	[[nodiscard]] constexpr const_iterator cend()const { return mat.cend(); }
+	[[nodiscard]] constexpr const_iterator begin()const { return mat.cbegin(); }
+	[[nodiscard]] constexpr const_iterator end()const { return mat.cend(); }
 
-	constexpr void append(const vector<_Elem>& v) {
+	constexpr void append(const std::vector<_Num>& v) {
 		assert(!(v.empty() || !mat.empty() && v.size() != sizev()));
 		mat.push_back(v);
 	}
 
-	constexpr void append(vector<_Elem>&& v) {//通过move元素来构造
+	constexpr void append(std::vector<_Num>&& v) {//通过move元素来构造
 		assert(!(v.empty() || !mat.empty() && v.size() != sizev()));
 		mat.push_back(v);
 	}
 
 	constexpr void transpose()noexcept {//行列交换
 		if (mat.empty())return;
-		vector<vector<_Elem>>_mat(sizev(), vector<_Elem>(sizeh()));
+		std::vector<std::vector<_Num>>_mat(sizev(), vector<_Num>(sizeh()));
 		for (size_t i = 0; i < sizeh(); i++)
 			for (size_t j = 0; j < sizev(); j++)
-				_mat[j][i] = move(mat[i][j]);
-		mat = move(_mat);
+				_mat[j][i] = std::move(mat[i][j]);
+		mat = std::move(_mat);
 	}
 
-	friend inline std::ostream& operator<<(std::ostream& os, const basic_matrix& m) {
-		os << endl << "matrix:" << endl;
+	template<typename _Char, typename _Traits = std::char_traits<_Char>>
+		requires std::_Is_character<_Char>::value
+	friend inline std::basic_ostream<_Char, _Traits>& operator<<//debugging support
+		(std::basic_ostream<_Char, _Traits>& os, const basic_matrix& m) {
+		os << os.widen('{');
 		for (const auto& v : m.mat) {
-			for (const _Elem& _t : v) {
-				os << _t << " ";
+			os << os.widen('{');
+			for (const auto& num : v) {
+				os << num << os.widen(',');
 			}
-			os << endl;
+			os << os.widen('}');
 		}
-		os << endl;
+		os << os.widen('}');
 		return os;
 	}
 
-	friend inline std::wostream& operator<<(std::wostream& os, const basic_matrix& m) {
-		os << endl << L"matrix:" << endl;
-		for (const auto& v : m.mat) {
-			for (const _Elem& _t : v) {
-				os << _t << L" ";
-			}
-			os << endl;
-		}
-		os << endl;
-		return os;
-	}
-
-	constexpr void operator *=(const _Elem& t)noexcept {
+	constexpr void operator *=(const _Num& t)noexcept {
 		for (auto& v : mat) {
-			for (_Elem& _t : v) {
+			for (_Num& _t : v) {
 				_t *= t;
 			}
 		}
@@ -89,7 +85,7 @@ public:
 				if (mat.at(j).at(i) == 0)continue;
 				std::swap(mat[i], mat[j]);
 				if (mat.at(j).at(i) == 0)continue;
-				_Elem a = mat.at(j).at(i) / mat.at(i).at(i);
+				_Num a = mat.at(j).at(i) / mat.at(i).at(i);
 				for (size_t k = i; k < sizev(); k++) {//倍增后减过去
 					if (mat.at(i).at(k) != 0) {
 						mat[j][k] -= mat.at(i).at(k) * a;
@@ -115,7 +111,7 @@ public:
 			pivot_columns.insert(pivot_col);//获得主元列
 			//系数化1
 			if (mat.at(i).at(pivot_col) != 1) {
-				_Elem factor = mat.at(i).at(pivot_col);
+				_Num factor = mat.at(i).at(pivot_col);
 				for (size_t j = pivot_col; j < sizev(); j++) {
 					mat[i][j] /= factor;
 				}
@@ -123,7 +119,7 @@ public:
 			//消除主元列其他元素
 			for (size_t j = 0; j < i; j++) {
 				if (mat.at(j).at(pivot_col) == 0)continue;
-				_Elem factor = mat.at(j).at(pivot_col);
+				_Num factor = mat.at(j).at(pivot_col);
 				for (size_t k = pivot_col; k < sizev(); k++) {
 					mat[j][k] -= mat.at(i).at(k) * factor;
 				}
@@ -142,18 +138,18 @@ public:
 					mat[j].erase(mat[j].begin() + i);
 		*this *= -1;
 		for (size_t i = 0; i < sizev(); i++) {
-			vector<_Elem>vec(sizev(), 0);
+			std::vector<_Num>vec(sizev(), 0);
 			vec[i] = 1;
 			mat.push_back(move(vec));
 		}
 		//重新排序
 		if (sizev() == 1)return true;
-		vector<size_t>order;
+		std::vector<size_t>order;
 		for (const size_t& x : pivot_columns)
 			order.push_back(x);
 		for (size_t i = 0; i < original_size; i++)
 			if (!pivot_columns.contains(i))order.push_back(i);
-		vector<vector<_Elem>>reordered_mat;
+		std::vector<std::vector<_Num>>reordered_mat;
 		for (size_t i = 0; i < original_size; i++)
 			reordered_mat.push_back(move(mat[order.at(i)]));
 		mat = move(reordered_mat);
@@ -161,6 +157,4 @@ public:
 	}
 };
 
-#if __has_include("rat.h")
 using ratmatrix = basic_matrix<rat>;
-#endif

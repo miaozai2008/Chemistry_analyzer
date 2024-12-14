@@ -1,11 +1,12 @@
 ﻿#pragma once
 #include "matrix.h"
 #include "substance.h"
+#include <format>
+#include <iostream>
 #include <list>
 #include <map>
 #include <numeric>
 #include <regex>
-#include <sstream>
 #include <string>
 using namespace std;
 
@@ -120,28 +121,16 @@ public:
 	}
 
 	[[nodiscard]] wstring print()const noexcept {//输出结果
-		auto join = [&](const list<wstring>& l, const wchar_t* w) {
-			if (l.empty())return wstring();
-			if (l.size() == 1)return l.front();
-			size_t i = 0;
-			wstring result;
-			for (const wstring& str : l) {
-				result.append(str);
-				result.append(w);
-				i++;
-				if (i == l.size() - 1)break;
+		auto join = [&](const list<wstring>& l, const wchar_t* w) ->wstring {
+			if (l.empty())return L"";
+			wstring joined = l.front();
+			for (auto it = std::next(l.cbegin()); it != l.cend(); it++) {
+				(joined += w) += *it;
 			}
-			result.append(l.back());
-			return result;
+			return joined;
 			};
-		auto to_wstring_ = [](double num, unsigned base) {
-			wostringstream out;
-			out.precision(base);
-			out << fixed << num;
-			return out.str();
-			};
-		wstring cond = tp.t == 273.15 + 25 ? L"" : to_wstring_(tp.t, 2) + L"K";//stp t
-		if (tp.p != 101)cond += (cond.empty() ? L"" : L",") + to_wstring_(tp.p, 2) + L"kPa";//stp p
+		wstring cond = tp.t == 273.15 + 25 ? L"" : std::format(L"{:.2f}", tp.t) + L"K";//stp t
+		if (tp.p != 101)cond += (cond.empty() ? L"" : L",") + std::format(L"{:.2f}", tp.p) + L"kPa";//stp p
 		cond = L"==" + cond + L"==";
 		list<wstring> list_;
 		for (size_t i = 0; i < mat.sizev(); i++) {//遍历列
@@ -164,10 +153,9 @@ public:
 					h += sub.h * mat[j][i].to_double() * (reversed ? 1 : -1);
 					s += sub.s * mat[j][i].to_double() * (reversed ? 1 : -1);
 				}
-				list_.push_back(L" ΔH=<u>" + to_wstring_(h, 3) + L"</u>kJ/mol");
+				list_.push_back(std::format(L"ΔH=<u>{:.2f}</u>kJ/mol", h));
 				if (tp.p == 101) {//标准大气压
-					list_.back().append(L" ΔS=<u>" + to_wstring_(s, 3) + L"</u>J/(molK)");
-					list_.back().append(L" ΔG=<u>" + to_wstring_(h - s * tp.t / 1000, 3) + L"</u>kJ/mol");
+					list_.back().append(std::format(L" ΔS=<u>{:.2f}</u>J/(molK) ΔG=<u>{:.2f}</u>kJ/mol", s, h - s * tp.t / 1000));
 				}
 			}
 		}

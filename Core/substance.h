@@ -120,11 +120,11 @@ public:
 				regex_search(it->first, it->second, match, num_reg);
 				const int num = match[1].length() ? stoi(match[1]) : 1;
 				if (match[1].second == it->second)throw L"物质格式错误，不能为空";
-				for (const auto& p : dispose(match[1].second, it->second))
-					elements[p.first] += num * p.second;
+				for (const auto& [elem, count] : dispose(match[1].second, it->second))
+					elements[elem] += num * count;
 			}
 		}
-		if (cnum != 0)elements.insert(pair<short, int>(-1, cnum));
+		if (cnum != 0)elements.emplace(-1, cnum);
 		//将表达式html化
 		for (size_t i = 1; i < html.size(); i++) {
 			if (iswdigit(html.at(i)) && html.at(i - 1) != L'·') {
@@ -135,7 +135,7 @@ public:
 				i += 6;
 			}
 		}
-		if (cnum != 0) {
+		if (cnum) {
 			if (abs(cnum) == 1)  html += L"<sup>" + wstring(cnum < 0 ? L"-" : L"+") + L"</sup>";
 			else  html += L"<sup>" + to_wstring(abs(cnum)) + (cnum < 0 ? L"-" : L"+") + L"</sup>";
 		}
