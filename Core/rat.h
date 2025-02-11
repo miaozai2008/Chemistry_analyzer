@@ -28,7 +28,7 @@ public:
 
 	constexpr basic_rat(const _Num& x, const _Num& y) :up(x), down(y) { simplify(); }
 	constexpr basic_rat(_Num&& x, _Num&& y) : up(x), down(y) { simplify(); }
-	constexpr basic_rat(const _Num& x = 0) : up(x), down(1) {  }
+	constexpr basic_rat(const _Num& x = 0) : up(x), down(1) {}
 	constexpr basic_rat(const basic_rat&)noexcept = default;
 	constexpr basic_rat(basic_rat&&)noexcept = default;
 	constexpr ~basic_rat() = default;
@@ -39,6 +39,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const basic_rat& x) { os << x.to_string(); return os; }
 	friend std::wostream& operator<<(std::wostream& os, const basic_rat& x) { os << x.to_wstring(); return os; }
 	[[nodiscard]] constexpr std::strong_ordering operator<=>(const basic_rat& x)const noexcept { return up * x.down <=> x.up * down; }
+	[[nodiscard]] constexpr std::strong_ordering operator<=>(const _Num& x)const noexcept { return up <=> x * down; }
 	[[nodiscard]] constexpr bool operator==(const _Num& x)const noexcept { return down == 1 && up == x; }
 
 	[[nodiscard]] constexpr friend basic_rat abs(const basic_rat& r)noexcept { return r.up < 0 ? -r : r; }

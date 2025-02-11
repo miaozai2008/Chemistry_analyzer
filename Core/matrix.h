@@ -19,8 +19,8 @@ public:
 	constexpr ~basic_matrix() = default;
 	constexpr void operator =(const basic_matrix& x) { mat = x.mat; }
 	constexpr void operator =(basic_matrix&& x)noexcept { mat = x.mat; }
-	[[nodiscard]] constexpr bool operator !=(const basic_matrix& x)const { return x.mat != mat; }
-	[[nodiscard]] constexpr bool operator ==(const basic_matrix& x)const { return x.mat == mat; }
+	[[nodiscard]] constexpr auto operator<=>(const basic_matrix& x)const { return mat <=> x.mat; }
+	[[nodiscard]] constexpr bool operator==(const basic_matrix& x)const { return x.mat == mat; }
 
 	[[nodiscard]] constexpr size_t sizeh()const { return mat.size(); }//行数
 	[[nodiscard]] constexpr size_t sizev()const { return mat.empty() ? 0 : mat.front().size(); }//列数

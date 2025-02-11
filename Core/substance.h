@@ -16,29 +16,31 @@ private:
 		if (!iswupper(*begin))throw L"元素必须以大写开头";
 		map<short, int>elems;
 		stack<int>amps;
-		int amp_ = 1;
-		wstring num;
+		int amp_ = 1;//当前倍数
+		int value = 0;//最近读入数字
 		for (_Cwit it = end - 1;; it--) {
-			if (iswdigit(*it))num.append(&*it);
-			else if (*it == L'(' || *it == L'[') {
+			for (int pow = 1; iswdigit(*it); it--, pow *= 10) {
+				value += (*it - L'0') * pow;
+			}
+			if (*it == L'(' || *it == L'[') {
 				amp_ /= amps.top();
 				amps.pop();
 			}
 			else {
-				const int cnt = num.empty() ? 1 : stoi(num);
-				num.clear();
-				amps.push(cnt);
-				amp_ *= cnt;
+				if (!value)value = 1;
+				amps.push(value);
+				amp_ *= value;
+				value = 0;
 				if (*it == L')' || *it == L']')continue;
 				if (iswupper(*it))elems[*it - L'A'] += amp_;
 				else if (iswlower(*it)) {
-					short key = (*it - L'a' + 1) * 26;
+					short key = (*it - L'a' + 1) << 5;
 					it--;
 					if (!iswupper(*it))throw L"无效元素";
-					elems[*it - L'A' + key] += amp_;
+					elems[(*it - L'A') | key] += amp_;
 				}
 				else throw L"未知符号";
-				amp_ /= cnt;
+				amp_ /= amps.top();
 				amps.pop();
 			}
 			if (it == begin)return elems;
