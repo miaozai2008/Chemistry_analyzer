@@ -13,11 +13,10 @@ private:
 	using _Cwit = wstring::const_iterator;
 
 	[[nodiscard]] inline map<short, int>dispose(_Cwit begin, _Cwit end)const {
-		if (!iswupper(*begin))throw L"元素必须以大写开头";
+		if (islower(*begin))throw L"无效元素";
 		map<short, int>elems;
 		stack<int>amps;
-		int amp_ = 1;//当前倍数
-		int value = 0;//最近读入数字
+		int amp_ = 1, value = 0;//当前倍数 最近读入数字
 		for (_Cwit it = end - 1;; it--) {
 			for (int pow = 1; iswdigit(*it); it--, pow *= 10) {
 				value += (*it - L'0') * pow;

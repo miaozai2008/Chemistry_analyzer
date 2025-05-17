@@ -90,11 +90,12 @@ public:
 				if (sub.count == 0) {
 					mat_.append(mat[i]);
 					i++;
-					continue;
 				}
-				vector<rat>vec = mat.back();
-				for (rat& r : vec)r *= sub.count;
-				mat_.append(move(vec));
+				else {
+					vector<rat>vec = mat.back();
+					for (rat& r : vec)r *= sub.count;
+					mat_.append(move(vec));
+				}
 			}
 			mat = move(mat_);
 		}
@@ -124,9 +125,8 @@ public:
 		auto join = [&](const list<wstring>& l, const wchar_t* w) ->wstring {
 			if (l.empty())return L"";
 			wstring joined = l.front();
-			for (auto it = std::next(l.cbegin()); it != l.cend(); it++) {
+			for (auto it = std::next(l.cbegin()); it != l.cend(); it++) 
 				(joined += w) += *it;
-			}
 			return joined;
 			};
 		wstring cond = tp.t == 273.15 + 25 ? L"" : std::format(L"{:.2f}", tp.t) + L"K";//stp t
@@ -154,9 +154,8 @@ public:
 					s += sub.s * mat[j][i].to_double() * (reversed ? 1 : -1);
 				}
 				list_.push_back(std::format(L"ΔH=<u>{:.2f}</u>kJ/mol", h));
-				if (tp.p == 101) {//标准大气压
+				if (tp.p == 101) //标准大气压
 					list_.back().append(std::format(L" ΔS=<u>{:.2f}</u>J/(molK) ΔG=<u>{:.2f}</u>kJ/mol", s, h - s * tp.t / 1000));
-				}
 			}
 		}
 		list<wstring> empty;
